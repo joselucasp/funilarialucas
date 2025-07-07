@@ -198,16 +198,22 @@ function carregarOS() {
             <td><span class="badge badge-prioridade badge-${os.prioridade}">${formatarPrioridade(os.prioridade)}</span></td>
             <td><strong class="text-success">R$ ${totalGeral.toFixed(2)}</strong></td>
             <td>
-                <button class="btn btn-sm btn-primary" onclick="editarOS(${os.numero})">
-                    <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-sm btn-info" onclick="verHistorico(${os.numero})">
-                    <i class="bi bi-clock-history"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="excluirOS(${os.numero})">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
+    <button class="btn btn-sm btn-primary" onclick="editarOS(${os.numero})">
+        <i class="bi bi-pencil"></i>
+    </button>
+    <button class="btn btn-sm btn-success" onclick="enviarPorWhatsApp(${os.numero})" title="Enviar por WhatsApp">
+        <i class="bi bi-whatsapp"></i>
+    </button>
+    <button class="btn btn-sm btn-warning" onclick="enviarPorEmail(${os.numero})" title="Enviar por Email">
+        <i class="bi bi-envelope"></i>
+    </button>
+    <button class="btn btn-sm btn-info" onclick="verHistorico(${os.numero})">
+        <i class="bi bi-clock-history"></i>
+    </button>
+    <button class="btn btn-sm btn-danger" onclick="excluirOS(${os.numero})">
+        <i class="bi bi-trash"></i>
+    </button>
+</td>
         `;
         tbody.appendChild(tr);
     });
@@ -241,17 +247,23 @@ function filtrarOS() {
             <td>${os.veiculo}</td>
             <td><span class="badge badge-status badge-${os.status}">${formatarStatus(os.status)}</span></td>
             <td><span class="badge badge-prioridade badge-${os.prioridade}">${formatarPrioridade(os.prioridade)}</span></td>
-            <td>
-                <button class="btn btn-sm btn-primary" onclick="editarOS(${os.numero})">
-                    <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-sm btn-info" onclick="verHistorico(${os.numero})">
-                    <i class="bi bi-clock-history"></i>
-                </button>
-                <button class="btn btn-sm btn-danger" onclick="excluirOS(${os.numero})">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </td>
+          <td>
+    <button class="btn btn-sm btn-primary" onclick="editarOS(${os.numero})">
+        <i class="bi bi-pencil"></i>
+    </button>
+    <button class="btn btn-sm btn-success" onclick="enviarPorWhatsApp(${os.numero})" title="Enviar por WhatsApp">
+        <i class="bi bi-whatsapp"></i>
+    </button>
+    <button class="btn btn-sm btn-warning" onclick="enviarPorEmail(${os.numero})" title="Enviar por Email">
+        <i class="bi bi-envelope"></i>
+    </button>
+    <button class="btn btn-sm btn-info" onclick="verHistorico(${os.numero})">
+        <i class="bi bi-clock-history"></i>
+    </button>
+    <button class="btn btn-sm btn-danger" onclick="excluirOS(${os.numero})">
+        <i class="bi bi-trash"></i>
+    </button>
+</td>
         `;
         tbody.appendChild(tr);
     });
@@ -1007,3 +1019,131 @@ function adicionarPecaOSOriginal() {
 // Substituir a função original
 window.adicionarPecaOS = adicionarPecaOSOriginal;
 
+// ===== FUNÇÕES PARA ENVIO POR WHATSAPP E EMAIL =====
+
+// Enviar OS por WhatsApp
+function enviarPorWhatsApp(numero) {
+    const os = ordemServicos.find(o => o.numero === numero);
+    if (!os) {
+        mostrarAlerta('OS não encontrada!', 'danger');
+        return;
+    }
+
+    // Verificar se há telefone cadastrado
+    if (!os.telefone) {
+        mostrarAlerta('Cliente não possui telefone cadastrado!', 'warning');
+        return;
+    }
+
+    // Formatar mensagem para WhatsApp
+    const mensagem = formatarMensagemOS(os);
+    
+    // Limpar telefone (remover caracteres especiais)
+    const telefone = os.telefone.replace(/\D/g, '');
+    
+    // Verificar se o telefone tem o formato correto (11 dígitos para celular brasileiro)
+    if (telefone.length < 10 || telefone.length > 11) {
+        mostrarAlerta('Número de telefone inválido!', 'warning');
+        return;
+    }
+
+    // Adicionar código do país se necessário
+    const telefoneCompleto = telefone.startsWith('55') ? telefone : '55' + telefone;
+    
+    // Criar URL do WhatsApp
+    const urlWhatsApp = `https://wa.me/${telefoneCompleto}?text=${encodeURIComponent(mensagem)}`;
+    
+    // Abrir WhatsApp em nova aba
+    window.open(urlWhatsApp, '_blank');
+    
+    // Registrar no histórico
+    if (!os.historico) os.historico = [];
+    os.historico.push({
+        data: new Date().toISOString(),
+        usuario: usuarioLogado.nome,
+        acao: 'Enviado por WhatsApp',
+        detalhes: `Mensagem enviada para ${os.telefone}`
+    });
+    
+    salvarDados();
+    mostrarAlerta(`OS #${numero} enviada por WhatsApp!`, 'success');
+}
+
+// Enviar OS por Email
+function enviarPorEmail(numero) {
+    const os = ordemServicos.find(o => o.numero === numero);
+    if (!os) {
+        mostrarAlerta('OS não encontrada!', 'danger');
+        return;
+    }
+
+    // Formatar mensagem para email
+    const assunto = `Ordem de Serviço #${os.numero} - ${os.cliente}`;
+    const corpo = formatarMensagemOS(os);
+    
+    // Criar URL do email
+    const urlEmail = `mailto:?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
+    
+    // Abrir cliente de email
+    window.location.href = urlEmail;
+    
+    // Registrar no histórico
+    if (!os.historico) os.historico = [];
+    os.historico.push({
+        data: new Date().toISOString(),
+        usuario: usuarioLogado.nome,
+        acao: 'Enviado por Email',
+        detalhes: 'Email preparado para envio'
+    });
+    
+    salvarDados();
+    mostrarAlerta(`OS #${numero} preparada para envio por email!`, 'success');
+}
+
+// Formatar mensagem da OS para envio
+function formatarMensagemOS(os) {
+    const dataFormatada = formatarDataHora(os.dataAbertura);
+    const statusFormatado = formatarStatus(os.status);
+    const prioridadeFormatada = formatarPrioridade(os.prioridade);
+    
+    // Calcular total de peças/serviços
+    const totalPecas = os.pecasServicos ? os.pecasServicos.reduce((total, peca) => total + peca.total, 0) : 0;
+    const custoServico = os.custoServico || 0;
+    const totalGeral = custoServico + totalPecas;
+    
+    // Formatar lista de peças/serviços
+    let listaPecas = '';
+    if (os.pecasServicos && os.pecasServicos.length > 0) {
+        listaPecas = '\n\n📋 *Peças/Serviços:*\n';
+        os.pecasServicos.forEach(peca => {
+            listaPecas += `• ${peca.descricao} - Qtd: ${peca.quantidade} - Valor: R$ ${peca.valorUnitario.toFixed(2)} - Total: R$ ${peca.total.toFixed(2)}\n`;
+        });
+    }
+    
+    const mensagem = `🔧 *ORDEM DE SERVIÇO #${os.numero}*
+
+👤 *Cliente:* ${os.cliente}
+${os.telefone ? `📞 *Telefone:* ${os.telefone}` : ''}
+🚗 *Veículo:* ${os.veiculo}
+${os.placa ? `🏷️ *Placa:* ${os.placa}` : ''}
+
+📝 *Problema Relatado:*
+${os.problema}
+
+📊 *Status:* ${statusFormatado}
+⚡ *Prioridade:* ${prioridadeFormatada}
+📅 *Data de Abertura:* ${dataFormatada}
+👨‍🔧 *Responsável:* ${os.usuarioAbertura}
+
+💰 *Valores:*
+• Custo do Serviço: R$ ${custoServico.toFixed(2)}
+• Total em Peças: R$ ${totalPecas.toFixed(2)}
+• *TOTAL GERAL: R$ ${totalGeral.toFixed(2)}*${listaPecas}
+
+${os.observacoes ? `\n📋 *Observações:*\n${os.observacoes}` : ''}
+
+---
+Sistema de OS - Oficina Mecânica`;
+
+    return mensagem;
+}
