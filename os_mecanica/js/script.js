@@ -1147,3 +1147,356 @@ Sistema de OS - Oficina Mecânica`;
 
     return mensagem;
 }
+
+
+
+// ===== SISTEMA FINANCEIRO =====
+
+// Variáveis para gráficos
+let graficoReceitaMensal = null;
+let graficoDistribuicao = null;
+
+// Atualizar relatório financeiro
+function atualizarRelatorioFinanceiro() {
+    const dataInicio = document.getElementById('filtroDataInicio').value;
+    const dataFim = document.getElementById('filtroDataFim').value;
+    
+    // Filtrar OS concluídas
+    let osConcluidas = ordemServicos.filter(os => os.status === 'concluida');
+    
+    // Aplicar filtro de data se especificado
+    if (dataInicio || dataFim) {
+        osConcluidas = osConcluidas.filter(os => {
+            const dataOS = new Date(os.dataAbertura).toISOString().split('T')[0];
+            const dentroInicio = !dataInicio || dataOS >= dataInicio;
+            const dentroFim = !dataFim || dataOS <= dataFim;
+            return dentroInicio && dentroFim;
+        });
+    }
+    
+    // Calcular totais
+    const totalOS = osConcluidas.length;
+    let receitaServicos = 0;
+    let receitaPecas = 0;
+    
+    osConcluidas.forEach(os => {
+        receitaServicos += os.custoServico || 0;
+        if (os.pecasServicos) {
+            receitaPecas += os.pecasServicos.reduce((total, peca) => total + peca.total, 0);
+        }
+    });
+    
+    const receitaTotal = receitaServicos + receitaPecas;
+    
+    // Atualizar cards
+    document.getElementById('totalOSConcluidas').textContent = totalOS;
+    document.getElementById('receitaTotal').textContent = `R$ ${receitaTotal.toFixed(2)}`;
+    document.getElementById('receitaServicos').textContent = `R$ ${receitaServicos.toFixed(2)}`;
+    document.getElementById('receitaPecas').textContent = `R$ ${receitaPecas.toFixed(2)}`;
+    
+    // Atualizar tabela
+    carregarTabelaFinanceiro(osConcluidas);
+    
+    // Atualizar estatísticas
+    atualizarEstatisticasFinanceiras(osConcluidas, receitaTotal);
+    
+    // Atualizar gráficos
+    atualizarGraficos(osConcluidas);
+    
+    // Atualizar top clientes
+    atualizarTopClientes(osConcluidas);
+}
+
+// Carregar tabela financeira
+function carregarTabelaFinanceiro(osConcluidas) {
+    const tbody = document.getElementById('tabelaFinanceiro');
+    tbody.innerHTML = '';
+    
+    osConcluidas.forEach(os => {
+        const custoServico = os.custoServico || 0;
+        const valorPecas = os.pecasServicos ? os.pecasServicos.reduce((total, peca) => total + peca.total, 0) : 0;
+        const totalOS = custoServico + valorPecas;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>#${os.numero}</strong></td>
+            <td>${formatarData(os.dataAbertura)}</td>
+            <td>${os.cliente}</td>
+            <td>${os.veiculo}</td>
+            <td class="text-info">R$ ${custoServico.toFixed(2)}</td>
+            <td class="text-warning">R$ ${valorPecas.toFixed(2)}</td>
+            <td class="text-success"><strong>R$ ${totalOS.toFixed(2)}</strong></td>
+            <td>
+                <button class="btn btn-sm btn-info" onclick="verHistorico(${os.numero})" title="Ver Histórico">
+                    <i class="bi bi-clock-history"></i>
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="verDetalhesFinanceiros(${os.numero})" title="Ver Detalhes">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Atualizar estatísticas financeiras
+function atualizarEstatisticasFinanceiras(osConcluidas, receitaTotal) {
+    if (osConcluidas.length === 0) {
+        document.getElementById('ticketMedio').textContent = 'R$ 0,00';
+        document.getElementById('maiorOS').textContent = 'R$ 0,00';
+        document.getElementById('menorOS').textContent = 'R$ 0,00';
+        document.getElementById('osPorDia').textContent = '0';
+        document.getElementById('receitaPorDia').textContent = 'R$ 0,00';
+        return;
+    }
+    
+    // Calcular valores de cada OS
+    const valoresOS = osConcluidas.map(os => {
+        const custoServico = os.custoServico || 0;
+        const valorPecas = os.pecasServicos ? os.pecasServicos.reduce((total, peca) => total + peca.total, 0) : 0;
+        return custoServico + valorPecas;
+    });
+    
+    // Ticket médio
+    const ticketMedio = receitaTotal / osConcluidas.length;
+    document.getElementById('ticketMedio').textContent = `R$ ${ticketMedio.toFixed(2)}`;
+    
+    // Maior e menor OS
+    const maiorOS = Math.max(...valoresOS);
+    const menorOS = Math.min(...valoresOS);
+    document.getElementById('maiorOS').textContent = `R$ ${maiorOS.toFixed(2)}`;
+    document.getElementById('menorOS').textContent = `R$ ${menorOS.toFixed(2)}`;
+    
+    // Calcular período em dias
+    const dataInicio = document.getElementById('filtroDataInicio').value;
+    const dataFim = document.getElementById('filtroDataFim').value;
+    
+    let diasPeriodo = 1;
+    if (dataInicio && dataFim) {
+        const inicio = new Date(dataInicio);
+        const fim = new Date(dataFim);
+        diasPeriodo = Math.max(1, Math.ceil((fim - inicio) / (1000 * 60 * 60 * 24)) + 1);
+    } else if (osConcluidas.length > 0) {
+        // Calcular baseado nas datas das OS
+        const datas = osConcluidas.map(os => new Date(os.dataAbertura));
+        const dataMin = new Date(Math.min(...datas));
+        const dataMax = new Date(Math.max(...datas));
+        diasPeriodo = Math.max(1, Math.ceil((dataMax - dataMin) / (1000 * 60 * 60 * 24)) + 1);
+    }
+    
+    // OS por dia e receita por dia
+    const osPorDia = (osConcluidas.length / diasPeriodo).toFixed(1);
+    const receitaPorDia = (receitaTotal / diasPeriodo).toFixed(2);
+    
+    document.getElementById('osPorDia').textContent = osPorDia;
+    document.getElementById('receitaPorDia').textContent = `R$ ${receitaPorDia}`;
+}
+
+// Aplicar filtro de período rápido
+function aplicarFiltroPeriodo() {
+    const periodo = document.getElementById('filtroPeriodo').value;
+    const hoje = new Date();
+    let dataInicio = '';
+    let dataFim = '';
+    
+    switch (periodo) {
+        case 'hoje':
+            dataInicio = dataFim = hoje.toISOString().split('T')[0];
+            break;
+        case 'semana':
+            const inicioSemana = new Date(hoje);
+            inicioSemana.setDate(hoje.getDate() - hoje.getDay());
+            dataInicio = inicioSemana.toISOString().split('T')[0];
+            dataFim = hoje.toISOString().split('T')[0];
+            break;
+        case 'mes':
+            dataInicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
+            dataFim = hoje.toISOString().split('T')[0];
+            break;
+        case 'trimestre':
+            const mesAtual = hoje.getMonth();
+            const inicioTrimestre = Math.floor(mesAtual / 3) * 3;
+            dataInicio = new Date(hoje.getFullYear(), inicioTrimestre, 1).toISOString().split('T')[0];
+            dataFim = hoje.toISOString().split('T')[0];
+            break;
+        case 'ano':
+            dataInicio = new Date(hoje.getFullYear(), 0, 1).toISOString().split('T')[0];
+            dataFim = hoje.toISOString().split('T')[0];
+            break;
+        case 'todos':
+            dataInicio = dataFim = '';
+            break;
+    }
+    
+    document.getElementById('filtroDataInicio').value = dataInicio;
+    document.getElementById('filtroDataFim').value = dataFim;
+    
+    atualizarRelatorioFinanceiro();
+}
+
+// Atualizar top clientes
+function atualizarTopClientes(osConcluidas) {
+    const clientesMap = {};
+    
+    osConcluidas.forEach(os => {
+        const custoServico = os.custoServico || 0;
+        const valorPecas = os.pecasServicos ? os.pecasServicos.reduce((total, peca) => total + peca.total, 0) : 0;
+        const totalOS = custoServico + valorPecas;
+        
+        if (!clientesMap[os.cliente]) {
+            clientesMap[os.cliente] = { total: 0, quantidade: 0 };
+        }
+        clientesMap[os.cliente].total += totalOS;
+        clientesMap[os.cliente].quantidade += 1;
+    });
+    
+    // Converter para array e ordenar
+    const topClientes = Object.entries(clientesMap)
+        .map(([cliente, dados]) => ({ cliente, ...dados }))
+        .sort((a, b) => b.total - a.total)
+        .slice(0, 5);
+    
+    const container = document.getElementById('topClientes');
+    container.innerHTML = '';
+    
+    if (topClientes.length === 0) {
+        container.innerHTML = '<p class="text-muted">Nenhum cliente encontrado no período.</p>';
+        return;
+    }
+    
+    topClientes.forEach((cliente, index) => {
+        const div = document.createElement('div');
+        div.className = 'mb-2';
+        div.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>${index + 1}. ${cliente.cliente}</strong><br>
+                    <small class="text-muted">${cliente.quantidade} OS</small>
+                </div>
+                <div class="text-end">
+                    <strong class="text-success">R$ ${cliente.total.toFixed(2)}</strong>
+                </div>
+            </div>
+            ${index < topClientes.length - 1 ? '<hr class="my-2">' : ''}
+        `;
+        container.appendChild(div);
+    });
+}
+
+// Ver detalhes financeiros de uma OS
+function verDetalhesFinanceiros(numero) {
+    const os = ordemServicos.find(o => o.numero === numero);
+    if (!os) return;
+    
+    const custoServico = os.custoServico || 0;
+    const valorPecas = os.pecasServicos ? os.pecasServicos.reduce((total, peca) => total + peca.total, 0) : 0;
+    const totalOS = custoServico + valorPecas;
+    
+    let detalhePecas = '';
+    if (os.pecasServicos && os.pecasServicos.length > 0) {
+        detalhePecas = '<h6>Peças/Serviços:</h6><ul>';
+        os.pecasServicos.forEach(peca => {
+            detalhePecas += `<li>${peca.descricao} - Qtd: ${peca.quantidade} - Valor Unit: R$ ${peca.valorUnitario.toFixed(2)} - Total: R$ ${peca.total.toFixed(2)}</li>`;
+        });
+        detalhePecas += '</ul>';
+    }
+    
+    const content = `
+        <h6>OS #${os.numero} - ${os.cliente}</h6>
+        <p><strong>Veículo:</strong> ${os.veiculo}</p>
+        <p><strong>Data:</strong> ${formatarDataHora(os.dataAbertura)}</p>
+        <hr>
+        <p><strong>Custo do Serviço:</strong> R$ ${custoServico.toFixed(2)}</p>
+        <p><strong>Valor em Peças:</strong> R$ ${valorPecas.toFixed(2)}</p>
+        <h5><strong>Total Geral: R$ ${totalOS.toFixed(2)}</strong></h5>
+        ${detalhePecas}
+    `;
+    
+    document.getElementById('historicoContent').innerHTML = content;
+    document.getElementById('historicoModalLabel').textContent = 'Detalhes Financeiros';
+    
+    const modal = new bootstrap.Modal(document.getElementById('historicoModal'));
+    modal.show();
+}
+
+// Exportar relatório financeiro
+function exportarRelatorioFinanceiro() {
+    const dataInicio = document.getElementById('filtroDataInicio').value;
+    const dataFim = document.getElementById('filtroDataFim').value;
+    
+    let osConcluidas = ordemServicos.filter(os => os.status === 'concluida');
+    
+    if (dataInicio || dataFim) {
+        osConcluidas = osConcluidas.filter(os => {
+            const dataOS = new Date(os.dataAbertura).toISOString().split('T')[0];
+            const dentroInicio = !dataInicio || dataOS >= dataInicio;
+            const dentroFim = !dataFim || dataOS <= dataFim;
+            return dentroInicio && dentroFim;
+        });
+    }
+    
+    // Criar CSV
+    let csv = 'OS,Data,Cliente,Veiculo,Custo_Servico,Valor_Pecas,Total\n';
+    
+    osConcluidas.forEach(os => {
+        const custoServico = os.custoServico || 0;
+        const valorPecas = os.pecasServicos ? os.pecasServicos.reduce((total, peca) => total + peca.total, 0) : 0;
+        const totalOS = custoServico + valorPecas;
+        
+        csv += `${os.numero},${formatarData(os.dataAbertura)},"${os.cliente}","${os.veiculo}",${custoServico.toFixed(2)},${valorPecas.toFixed(2)},${totalOS.toFixed(2)}\n`;
+    });
+    
+    // Download do arquivo
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `relatorio_financeiro_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    mostrarAlerta('Relatório exportado com sucesso!', 'success');
+}
+
+// Atualizar gráficos (versão simplificada sem Chart.js)
+function atualizarGraficos(osConcluidas) {
+    // Para implementação completa, seria necessário incluir Chart.js
+    // Por enquanto, vamos mostrar uma mensagem informativa
+    
+    const canvasReceita = document.getElementById('graficoReceitaMensal');
+    const canvasDistribuicao = document.getElementById('graficoDistribuicao');
+    
+    if (canvasReceita) {
+        const ctx = canvasReceita.getContext('2d');
+        ctx.clearRect(0, 0, canvasReceita.width, canvasReceita.height);
+        ctx.fillStyle = '#6c757d';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Gráfico de Receita Mensal', canvasReceita.width / 2, canvasReceita.height / 2 - 10);
+        ctx.fillText('(Implementar Chart.js para gráficos completos)', canvasReceita.width / 2, canvasReceita.height / 2 + 10);
+    }
+    
+    if (canvasDistribuicao) {
+        const ctx = canvasDistribuicao.getContext('2d');
+        ctx.clearRect(0, 0, canvasDistribuicao.width, canvasDistribuicao.height);
+        ctx.fillStyle = '#6c757d';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Gráfico de Distribuição', canvasDistribuicao.width / 2, canvasDistribuicao.height / 2 - 10);
+        ctx.fillText('(Implementar Chart.js para gráficos completos)', canvasDistribuicao.width / 2, canvasDistribuicao.height / 2 + 10);
+    }
+}
+
+// Modificar a função showSection para incluir o financeiro
+const showSectionOriginal = showSection;
+function showSection(sectionId) {
+    showSectionOriginal(sectionId);
+    
+    if (sectionId === 'financeiro') {
+        // Definir período padrão (este mês)
+        document.getElementById('filtroPeriodo').value = 'mes';
+        aplicarFiltroPeriodo();
+    }
+}
