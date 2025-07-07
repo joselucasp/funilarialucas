@@ -1,0 +1,26 @@
+[
+  {
+    "numero": 1,
+    "cliente": "João Silva",
+    "telefone": "(11) 99999-9999",
+    "veiculo": "Honda Civic 2018",
+    "placa": "ABC-1234",
+    "problema": "Barulho estranho no motor ao acelerar. Cliente relata que o problema começou há 3 dias.",
+    "status": "aberta",
+    "prioridade": "media",
+    "observacoes": "",
+    "dataAbertura": "2025-07-01T12:01:00.000Z",
+    "usuarioAbertura": "admin",
+    "historico": [
+      {
+        "data": "2025-07-01T12:01:00.000Z",
+        "usuario": "admin",
+        "acao": "Abertura da OS",
+        "detalhes": "Status: Aberta, Prioridade: Média"
+      }
+    ],
+    "custoServico": 0,
+    "pecasServicos": []
+  }
+]
+
