@@ -1496,10 +1496,7 @@ function showSection(sectionId) {
     
     if (sectionId === 'financeiro') {
         // Definir período padrão (este mês)
-        const filtro = document.getElementById('filtroPeriodo');
-if (filtro) {
-    filtro.value = 'mes';
+        document.getElementById('filtroPeriodo').value = 'mes';
         aplicarFiltroPeriodo();
     }
-}
 }
