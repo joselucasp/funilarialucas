@@ -1162,7 +1162,7 @@ function atualizarRelatorioFinanceiro() {
     const dataFim = document.getElementById('filtroDataFim').value;
     
     // Filtrar OS concluídas
-    let osConcluidas = ordemServicos.filter(os => os.status === 'concluida');
+    let osConcluidas = ordemServicos.filter(os => os.status === 'concluída');
     
     // Aplicar filtro de data se especificado
     if (dataInicio || dataFim) {
