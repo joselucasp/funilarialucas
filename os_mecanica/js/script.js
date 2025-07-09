@@ -722,22 +722,32 @@ function adicionarPecaOS() {
 
     const peca = {
         id: Date.now(),
-        descricao: descricao,
-        quantidade: quantidade,
-        valorUnitario: valorUnitario,
+        descricao,
+        quantidade,
+        valorUnitario,
         total: quantidade * valorUnitario
     };
 
-    pecasOSAtual.push(peca);
-    atualizarTabelaPecasOS();
-    calcularTotalGeral();
+    const modal = document.getElementById('selecionarPecaModal');
+    const modoEdicao = modal.getAttribute('data-modo') === 'edicao';
+
+    if (modoEdicao) {
+        pecasOSEdicao.push(peca);
+        atualizarTabelaPecasOSEdicao();
+        calcularTotalGeralEdicao();
+    } else {
+        pecasOSAtual.push(peca);
+        atualizarTabelaPecasOS();
+        calcularTotalGeral();
+    }
 
     // Fechar modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('selecionarPecaModal'));
-    modal.hide();
+    const modalInstance = bootstrap.Modal.getInstance(modal);
+    modalInstance.hide();
 
     mostrarAlerta('Peça/serviço adicionado com sucesso!', 'success');
 }
+
 
 // Atualizar tabela de peças da OS
 function atualizarTabelaPecasOS() {
@@ -976,48 +986,6 @@ function abrirModalNovoProdutoEdicao() {
     document.getElementById('novoProdutoModal').setAttribute('data-modo', 'edicao');
 }
 
-// Modificar a função adicionarPecaOS para suportar edição
-function adicionarPecaOSOriginal() {
-    const descricao = document.getElementById('descricaoSelecionada').value;
-    const quantidade = parseFloat(document.getElementById('quantidadePeca').value);
-    const valorUnitario = parseFloat(document.getElementById('valorUnitarioPeca').value);
-
-    if (!descricao || quantidade <= 0 || valorUnitario < 0) {
-        mostrarAlerta('Preencha todos os campos corretamente!', 'warning');
-        return;
-    }
-
-    const peca = {
-        id: Date.now(),
-        descricao: descricao,
-        quantidade: quantidade,
-        valorUnitario: valorUnitario,
-        total: quantidade * valorUnitario
-    };
-
-    // Verificar se estamos em modo edição
-    const modal = document.getElementById('selecionarPecaModal');
-    const modoEdicao = modal.getAttribute('data-modo') === 'edicao';
-
-    if (modoEdicao) {
-        pecasOSEdicao.push(peca);
-        atualizarTabelaPecasOSEdicao();
-        calcularTotalGeralEdicao();
-    } else {
-        pecasOSAtual.push(peca);
-        atualizarTabelaPecasOS();
-        calcularTotalGeral();
-    }
-
-    // Fechar modal
-    const modalInstance = bootstrap.Modal.getInstance(modal);
-    modalInstance.hide();
-
-    mostrarAlerta('Peça/serviço adicionado com sucesso!', 'success');
-}
-
-// Substituir a função original
-window.adicionarPecaOS = adicionarPecaOSOriginal;
 
 // ===== SISTEMA FINANCEIRO =====
 
@@ -1359,15 +1327,13 @@ function atualizarGraficos(osConcluidas) {
 }
 
 // Modificar a função showSection para incluir o financeiro
-const showSectionOriginal = showSection;
-function showSection(sectionId) {
-    showSectionOriginal(sectionId);
-    
-    if (sectionId === 'financeiro') {
-        // Definir período padrão (este mês)
-        document.getElementById('filtroPeriodo').value = 'mes';
+function showFinanceiroSection() {
+    showSection('financeiro');
+    const filtro = document.getElementById('filtroPeriodo');
+    if (filtro) {
+        filtro.value = 'mes';
         aplicarFiltroPeriodo();
-    }
+}
 }
 // ===== FUNÇÕES PARA ENVIO POR WHATSAPP E EMAIL =====
 
