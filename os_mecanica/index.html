@@ -51,6 +51,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="showSection('usuarios')"><i class="bi bi-people"></i> Usuários</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('financeiro')"><i class="bi bi-cash-coin"></i> Financeiro</a>
+                        </li>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item">
@@ -333,6 +336,206 @@
             </div>
         </div>
     </div>
+    <!-- Seção Financeiro -->
+        <div id="financeiro" class="content-section" style="display: none;">
+            <div class="row">
+                <!-- Cards de Resumo -->
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-header">
+                            <h6><i class="bi bi-check-circle"></i> OS Concluídas</h6>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="totalOSConcluidas">0</h4>
+                            <small>Total de OS finalizadas</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-header">
+                            <h6><i class="bi bi-currency-dollar"></i> Receita Total</h6>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="receitaTotal">R$ 0,00</h4>
+                            <small>Valor total arrecadado</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-info">
+                        <div class="card-header">
+                            <h6><i class="bi bi-tools"></i> Receita Serviços</h6>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="receitaServicos">R$ 0,00</h4>
+                            <small>Valor em serviços</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-header">
+                            <h6><i class="bi bi-gear"></i> Receita Peças</h6>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="receitaPecas">R$ 0,00</h4>
+                            <small>Valor em peças</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <!-- Filtros -->
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-funnel"></i> Filtros de Período</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="filtroDataInicio" class="form-label">Data Início</label>
+                                    <input type="date" class="form-control" id="filtroDataInicio" onchange="atualizarRelatorioFinanceiro()">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="filtroDataFim" class="form-label">Data Fim</label>
+                                    <input type="date" class="form-control" id="filtroDataFim" onchange="atualizarRelatorioFinanceiro()">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="filtroPeriodo" class="form-label">Período Rápido</label>
+                                    <select class="form-select" id="filtroPeriodo" onchange="aplicarFiltroPeriodo()">
+                                        <option value="">Personalizado</option>
+                                        <option value="hoje">Hoje</option>
+                                        <option value="semana">Esta Semana</option>
+                                        <option value="mes">Este Mês</option>
+                                        <option value="trimestre">Este Trimestre</option>
+                                        <option value="ano">Este Ano</option>
+                                        <option value="todos">Todos os Períodos</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="button" class="btn btn-primary w-100" onclick="atualizarRelatorioFinanceiro()">
+                                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <!-- Gráfico de Receita por Mês -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-bar-chart"></i> Receita por Mês</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="graficoReceitaMensal" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gráfico de Distribuição Serviços vs Peças -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-pie-chart"></i> Distribuição de Receita</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="graficoDistribuicao" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <!-- Tabela de OS Concluídas -->
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="bi bi-table"></i> OS Concluídas - Detalhamento Financeiro</h5>
+                            <button type="button" class="btn btn-success btn-sm" onclick="exportarRelatorioFinanceiro()">
+                                <i class="bi bi-download"></i> Exportar
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>OS #</th>
+                                            <th>Data Conclusão</th>
+                                            <th>Cliente</th>
+                                            <th>Veículo</th>
+                                            <th>Custo Serviço</th>
+                                            <th>Valor Peças</th>
+                                            <th>Total</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabelaFinanceiro">
+                                        <!-- OS concluídas serão carregadas aqui -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumo Estatístico -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-calculator"></i> Estatísticas do Período</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Ticket Médio:</strong></td>
+                                    <td id="ticketMedio">R$ 0,00</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Maior OS:</strong></td>
+                                    <td id="maiorOS">R$ 0,00</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Menor OS:</strong></td>
+                                    <td id="menorOS">R$ 0,00</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>OS por Dia (média):</strong></td>
+                                    <td id="osPorDia">0</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Receita por Dia (média):</strong></td>
+                                    <td id="receitaPorDia">R$ 0,00</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-trophy"></i> Top Clientes</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="topClientes">
+                                <!-- Top clientes serão carregados aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     <!-- Modal para Editar OS -->
     <div class="modal fade" id="editarOSModal" tabindex="-1" aria-labelledby="editarOSModalLabel" aria-hidden="true">
