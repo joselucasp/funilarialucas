@@ -6,7 +6,12 @@ let produtosServicos = [];
 let usuarioLogado = null;
 let proximoNumeroOS = 1;
 let proximoIdProduto = 1;
-let pecasOSAtual = [];
+let pecasOSEdicao = [];
+let osAtualEdicao = null;
+let pecasOSAtual = []; // ou const, dependendo do uso
+
+
+
 
 // Inicialização do sistema
 document.addEventListener('DOMContentLoaded', function() {
@@ -294,10 +299,10 @@ function editarOS(numero) {
     // Carregar peças/serviços da OS
     pecasOSEdicao = os.pecasServicos ? [...os.pecasServicos] : [];
     atualizarTabelaPecasOSEdicao();
-    calcularTotalGeralEdicao();
+    calcularTotalGeralEdicao(); // Chamar a função de cálculo para edição
 
-    // Mostrar modal
-    const modal = new bootstrap.Modal(document.getElementById('editarOSModal'));
+    // Mostrar modal de edição da OS
+    const modal = new bootstrap.Modal(document.getElementById("editarOSModal"));
     modal.show();
 }
 
@@ -332,8 +337,8 @@ function salvarEdicaoOS() {
     os.pecasServicos = [...pecasOSEdicao];
     
     // Calcular total geral
-    const totalPecas = os.pecasServicos.reduce((total, peca) => total + peca.total, 0);
-    os.totalGeral = os.custoServico + totalPecas;
+    const totalPecasEdicao = os.pecasServicos.reduce((total, peca) => total + peca.total, 0);
+    os.totalGeral = os.custoServico + totalPecasEdicao;
 
     // Adicionar nova observação se fornecida
     const novaObservacao = document.getElementById('novaObservacao').value;
@@ -697,8 +702,11 @@ function selecionarPeca(produto) {
     modal.show();
 
     // Limpar busca
-    document.getElementById('buscaPeca').value = '';
-    document.getElementById('sugestoesPecas').style.display = 'none';
+    document.getElementById("buscaPeca").value = "";
+    document.getElementById("sugestoesPecas").style.display = "none";
+    
+    // Garantir que o modal não está em modo edição ao adicionar nova OS
+    document.getElementById("selecionarPecaModal").removeAttribute("data-modo");
 }
 
 // Calcular total da peça no modal
@@ -709,43 +717,48 @@ function calcularTotalPeca() {
     document.getElementById('totalPeca').value = `R$ ${total.toFixed(2)}`;
 }
 
-// Adicionar peça à OS
+// Adicionar peça à OS (funciona para novo cadastro ou edição)
+//const modal = bootstrap.Modal.getInstance(document.getElementById('selecionarPecaModal'));
+//function adicionarPecaOS() {
+    
+    //const descricao = document.getElementById('descricaoSelecionada').value;
+    //const quantidade = parseFloat(document.getElementById('quantidadePeca').value);
+    //const valorUnitario = parseFloat(document.getElementById('valorUnitarioPeca').value);
+
 function adicionarPecaOS() {
-    const descricao = document.getElementById('descricaoSelecionada').value;
-    const quantidade = parseFloat(document.getElementById('quantidadePeca').value);
-    const valorUnitario = parseFloat(document.getElementById('valorUnitarioPeca').value);
+  const modalEl = document.getElementById('selecionarPecaModal');
+  const modoEdicao = modalEl.getAttribute('data-modo');
 
-    if (!descricao || quantidade <= 0 || valorUnitario < 0) {
-        mostrarAlerta('Preencha todos os campos corretamente!', 'warning');
-        return;
-    }
+  const descricao = document.getElementById('descricaoSelecionada').value;
+  const quantidade = parseFloat(document.getElementById('quantidadePeca').value);
+  const valorUnitario = parseFloat(document.getElementById('valorUnitarioPeca').value);
 
-    const peca = {
-        id: Date.now(),
-        descricao,
-        quantidade,
-        valorUnitario,
-        total: quantidade * valorUnitario
-    };
+  if (!descricao || quantidade <= 0 || valorUnitario < 0) {
+    mostrarAlerta('Preencha todos os campos corretamente!', 'warning');
+    return;
+  }
 
-    const modal = document.getElementById('selecionarPecaModal');
-    const modoEdicao = modal.getAttribute('data-modo') === 'edicao';
+  const peca = {
+    id: Date.now(),
+    descricao,
+    quantidade,
+    valorUnitario,
+    total: quantidade * valorUnitario
+  };
 
-    if (modoEdicao) {
-        pecasOSEdicao.push(peca);
-        atualizarTabelaPecasOSEdicao();
-        calcularTotalGeralEdicao();
-    } else {
-        pecasOSAtual.push(peca);
-        atualizarTabelaPecasOS();
-        calcularTotalGeral();
-    }
+  if (modoEdicao === 'edicao') {
+    pecasOSEdicao.push(peca);
+    atualizarTabelaPecasOSEdicao();
+    calcularTotalGeralEdicao(); // Chamar a função de cálculo para edição
+  } else {
+    pecasOSAtual.push(peca);
+    atualizarTabelaPecasOS();
+    calcularTotalGeral();
+  }
 
-    // Fechar modal
-    const modalInstance = bootstrap.Modal.getInstance(modal);
-    modalInstance.hide();
-
-    mostrarAlerta('Peça/serviço adicionado com sucesso!', 'success');
+  const modalInstance = bootstrap.Modal.getInstance(modalEl);
+  modalInstance.hide();
+  mostrarAlerta('Peça/serviço adicionada com sucesso!', 'success');
 }
 
 
@@ -794,8 +807,6 @@ function abrirModalNovoProduto() {
     const modal = new bootstrap.Modal(document.getElementById('novoProdutoModal'));
     modal.show();
 }
-
-// Salvar novo produto/serviço
 function salvarNovoProduto() {
     const descricao = document.getElementById('descricaoProduto').value;
     const tipo = document.getElementById('tipoProduto').value;
@@ -821,20 +832,25 @@ function salvarNovoProduto() {
     salvarDados();
 
     // Fechar modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('novoProdutoModal'));
+    const modalEl = document.getElementById('novoProdutoModal');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    
+    // Esperar o modal fechar para remover foco
+    modalEl.addEventListener('hidden.bs.modal', () => {
+        document.activeElement.blur(); // remove foco depois do fechamento
+        // ou: document.getElementById('botaoNovoProduto').focus();
+    }, { once: true });
+
     modal.hide();
 
     mostrarAlerta(`${tipo === 'peca' ? 'Peça' : 'Serviço'} cadastrado com sucesso!`, 'success');
-
-    // Adicionar automaticamente à OS se desejar
     selecionarPeca(produto);
 }
 
 
+
 // ===== FUNÇÕES PARA EDIÇÃO DE OS COM PRODUTOS =====
 
-let pecasOSEdicao = [];
-let osAtualEdicao = null;
 
 // Configurar eventos para edição de peças
 function configurarEventosEdicaoPecas() {
@@ -853,9 +869,9 @@ function configurarEventosEdicaoPecas() {
     }
 
     // Evento para calcular total quando custo do serviço mudar na edição
-    const editarCustoServico = document.getElementById('editarCustoServico');
+    const editarCustoServico = document.getElementById("editarCustoServico");
     if (editarCustoServico) {
-        editarCustoServico.addEventListener('input', calcularTotalGeralEdicao);
+        editarCustoServico.addEventListener("input", calcularTotalGeralEdicao);
     }
 }
 
@@ -919,22 +935,22 @@ function buscarPecasServicosEdicao(termo) {
 
 // Selecionar peça para adicionar à OS na edição
 function selecionarPecaEdicao(produto) {
-    document.getElementById('idProdutoSelecionado').value = produto.id;
-    document.getElementById('descricaoSelecionada').value = produto.descricao;
-    document.getElementById('valorUnitarioPeca').value = produto.valorUnitario;
-    document.getElementById('quantidadePeca').value = 1;
+    document.getElementById("idProdutoSelecionado").value = produto.id;
+    document.getElementById("descricaoSelecionada").value = produto.descricao;
+    document.getElementById("valorUnitarioPeca").value = produto.valorUnitario;
+    document.getElementById("quantidadePeca").value = 1;
     calcularTotalPeca();
 
+    // Definir que estamos em modo edição ANTES de mostrar o modal
+    document.getElementById("selecionarPecaModal").setAttribute("data-modo", "edicao");
+
     // Mostrar modal
-    const modal = new bootstrap.Modal(document.getElementById('selecionarPecaModal'));
+    const modal = new bootstrap.Modal(document.getElementById("selecionarPecaModal"));
     modal.show();
 
     // Limpar busca
-    document.getElementById('editarBuscaPeca').value = '';
-    document.getElementById('editarSugestoesPecas').style.display = 'none';
-    
-    // Definir que estamos em modo edição
-    document.getElementById('selecionarPecaModal').setAttribute('data-modo', 'edicao');
+    document.getElementById("editarBuscaPeca").value = "";
+    document.getElementById("editarSugestoesPecas").style.display = "none";
 }
 
 // Atualizar tabela de peças da OS na edição
@@ -963,28 +979,32 @@ function atualizarTabelaPecasOSEdicao() {
 function removerPecaOSEdicao(index) {
     pecasOSEdicao.splice(index, 1);
     atualizarTabelaPecasOSEdicao();
-    calcularTotalGeralEdicao();
-    mostrarAlerta('Peça/serviço removido!', 'info');
+    calcularTotalGeralEdicao(); // Chamar a função de cálculo para edição
+    mostrarAlerta("Peça/serviço removido!", "info");
 }
 
 // Calcular total geral da OS na edição
 function calcularTotalGeralEdicao() {
-    const custoServico = parseFloat(document.getElementById('editarCustoServico').value) || 0;
+    const custoServico = parseFloat(document.getElementById("editarCustoServico").value) || 0;
     const totalPecas = pecasOSEdicao.reduce((total, peca) => total + peca.total, 0);
     const totalGeral = custoServico + totalPecas;
     
-    document.getElementById('editarTotalGeral').value = `R$ ${totalGeral.toFixed(2)}`;
+    document.getElementById("editarTotalGeral").value = `R$ ${totalGeral.toFixed(2)}`;
 }
 
-// Abrir modal para novo produto na edição
-function abrirModalNovoProdutoEdicao() {
-    document.getElementById('novoProdutoForm').reset();
-    const modal = new bootstrap.Modal(document.getElementById('novoProdutoModal'));
-    modal.show();
-    
-    // Definir que estamos em modo edição
-    document.getElementById('novoProdutoModal').setAttribute('data-modo', 'edicao');
+// Abre modal de seleção de peça no modo edição
+function abrirModalEdicao(os) {
+  osAtualEdicao = os;
+  pecasOSEdicao = os.pecasServicos ? os.pecasServicos.slice() : [];
+  document.getElementById("editarCustoServico").value = os.custoServico || 0;
+  atualizarTabelaPecasOSEdicao();
+  calcularTotalGeralEdicao();
+
+  const modalEl = document.getElementById("selecionarPecaModal");
+  modalEl.setAttribute("data-modo", "edicao");
+  // Não abrir o modal de seleção de peça aqui, ele é aberto pela função selecionarPecaEdicao
 }
+
 
 
 // ===== SISTEMA FINANCEIRO =====
