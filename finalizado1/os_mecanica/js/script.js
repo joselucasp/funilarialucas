@@ -1,4 +1,3 @@
-
 // Sistema de OS - Oficina Mecânica
 // Variáveis globais
 let ordemServicos = [];
@@ -22,7 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
     configurarEventosPecas();
     atualizarEstatisticas();
     configurarEventosEdicaoPecas();
-   
 });
 
 // Configurar eventos dos formulários
@@ -221,10 +219,6 @@ function carregarOS() {
             <button class="btn btn-sm btn-danger" onclick="excluirOS(${os.numero})">
             <i class="bi bi-trash"></i>
             </button>
-            <button class="btn btn-sm btn-danger" onclick="exportarOSIndividual(${os.numero})" title="Exportar PDF">
-    <i class="bi bi-file-earmark-pdf"></i>
-</button>
-
             </td>
         `;
         tbody.appendChild(tr);
@@ -725,21 +719,21 @@ function calcularTotalPeca() {
 }
 
 // Adicionar peça à OS (funciona para novo cadastro ou edição)
-const modal = bootstrap.Modal.getInstance(document.getElementById('selecionarPecaModal'));
-function adicionarPecaOS() {
-    
-    const descricao = document.getElementById('descricaoSelecionada').value;
-    const quantidade = parseFloat(document.getElementById('quantidadePeca').value);
-    const valorUnitario = parseFloat(document.getElementById('valorUnitarioPeca').value);
-
+//const modal = bootstrap.Modal.getInstance(document.getElementById('selecionarPecaModal'));
 //function adicionarPecaOS() {
-  //const modalEl = document.getElementById('selecionarPecaModal');
-  //const modoEdicao = modalEl.getAttribute('data-modo');
-  //const numero = parseInt(document.getElementById('editarOSId').value);
+    
+    //const descricao = document.getElementById('descricaoSelecionada').value;
+    //const quantidade = parseFloat(document.getElementById('quantidadePeca').value);
+    //const valorUnitario = parseFloat(document.getElementById('valorUnitarioPeca').value);
 
-  //const descricao = document.getElementById('descricaoSelecionada').value;
-  //const quantidade = parseFloat(document.getElementById('quantidadePeca').value);
-  //const valorUnitario = parseFloat(document.getElementById('valorUnitarioPeca').value);
+function adicionarPecaOS() {
+  const modalEl = document.getElementById('selecionarPecaModal');
+  const modoEdicao = modalEl.getAttribute('data-modo');
+  const numero = parseInt(document.getElementById('editarOSId').value);
+
+  const descricao = document.getElementById('descricaoSelecionada').value;
+  const quantidade = parseFloat(document.getElementById('quantidadePeca').value);
+  const valorUnitario = parseFloat(document.getElementById('valorUnitarioPeca').value);
 
   if (!descricao || quantidade <= 0 || valorUnitario < 0) {
     mostrarAlerta('Preencha todos os campos corretamente!', 'warning');
@@ -1452,7 +1446,7 @@ function enviarPorEmail(numero) {
 function formatarMensagemOS(os) {
     const dataFormatada = formatarDataHora(os.dataAbertura);
     const statusFormatado = formatarStatus(os.status);
-   
+    const prioridadeFormatada = formatarPrioridade(os.prioridade);
     
     // Calcular total de peças/serviços
     const totalPecas = os.pecasServicos ? os.pecasServicos.reduce((total, peca) => total + peca.total, 0) : 0;
@@ -1462,185 +1456,37 @@ function formatarMensagemOS(os) {
     // Formatar lista de peças/serviços
     let listaPecas = '';
     if (os.pecasServicos && os.pecasServicos.length > 0) {
-        listaPecas = '\n\n *Peças/Serviços:*\n';
+        listaPecas = '\n\n📋 *Peças/Serviços:*\n';
         os.pecasServicos.forEach(peca => {
             listaPecas += `• ${peca.descricao} - Qtd: ${peca.quantidade} - Valor: R$ ${peca.valorUnitario.toFixed(2)} - Total: R$ ${peca.total.toFixed(2)}\n`;
         });
     }
     
-    const mensagem = ` *ORDEM DE SERVIÇO #${os.numero}*
+    const mensagem = `🔧 *ORDEM DE SERVIÇO #${os.numero}*
 
- *Cliente:* ${os.cliente}
-${os.telefone ? ` *Telefone:* ${os.telefone}` : ''}
- *Veículo:* ${os.veiculo}
-${os.placa ? ` *Placa:* ${os.placa}` : ''}
+👤 *Cliente:* ${os.cliente}
+${os.telefone ? `📞 *Telefone:* ${os.telefone}` : ''}
+🚗 *Veículo:* ${os.veiculo}
+${os.placa ? `🏷️ *Placa:* ${os.placa}` : ''}
 
- *Problema Relatado:*
+📝 *Problema Relatado:*
 ${os.problema}
 
- *Status:* ${statusFormatado}
- *Data de Abertura:* ${dataFormatada}
+📊 *Status:* ${statusFormatado}
+⚡ *Prioridade:* ${prioridadeFormatada}
+📅 *Data de Abertura:* ${dataFormatada}
+👨‍🔧 *Responsável:* ${os.usuarioAbertura}
 
-
- *Valores:*
+💰 *Valores:*
 • Custo do Serviço: R$ ${custoServico.toFixed(2)}
 • Total em Peças: R$ ${totalPecas.toFixed(2)}
 • *TOTAL GERAL: R$ ${totalGeral.toFixed(2)}*${listaPecas}
 
-${os.observacoes ? `\n *Observações:*\n${os.observacoes}` : ''}
+${os.observacoes ? `\n📋 *Observações:*\n${os.observacoes}` : ''}
 
 ---
-ARF Funalizaria e Pintura`;
+Sistema de OS - Oficina Mecânica`;
 
     return mensagem;
 }
-async function exportarOSParaPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    const filtroStatus = document.getElementById('filtroStatus').value;
-    const filtroCliente = document.getElementById('filtroCliente').value.toLowerCase();
-    const filtroVeiculo = document.getElementById('filtroVeiculo').value.toLowerCase();
-    const filtroData = document.getElementById('filtroData').value;
-
-    const osFiltradas = ordemServicos.filter(os => {
-        const matchStatus = !filtroStatus || os.status === filtroStatus;
-        const matchCliente = !filtroCliente || os.cliente.toLowerCase().includes(filtroCliente);
-        const matchVeiculo = !filtroVeiculo || os.veiculo.toLowerCase().includes(filtroVeiculo);
-        const matchData = !filtroData || os.dataAbertura.startsWith(filtroData);
-        return matchStatus && matchCliente && matchVeiculo && matchData;
-    });
-
-    if (osFiltradas.length === 0) {
-        mostrarAlerta("Nenhuma OS encontrada para exportar!", "warning");
-        return;
-    }
-
-    doc.text("Relatório de Ordens de Serviço", 14, 15);
-
-    const rows = osFiltradas.map(os => [
-        `#${os.numero}`,
-        formatarData(os.dataAbertura),
-        os.cliente,
-        os.veiculo,
-        formatarStatus(os.status),
-        formatarPrioridade(os.prioridade),
-        `R$ ${os.totalGeral.toFixed(2)}`
-    ]);
-
-    doc.autoTable({
-        head: [["OS", "Data", "Cliente", "Veículo", "Status", "Prioridade", "Total"]],
-        body: rows,
-        startY: 20,
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [40, 40, 40] }
-    });
-
-    doc.save(`ordens_servico.pdf`);
-}
-// Importe o plugin autoTable se estiver usando um sistema de módulos.
-// Se não, certifique-se de que o script jspdf-autotable.js foi carregado no seu HTML.
-// import 'jspdf-autotable';
-
-function exportarOSIndividual(numero) {
-    const os = ordemServicos.find(o => o.numero === numero);
-    if (!os) {
-        mostrarAlerta('OS não encontrada!', 'danger');
-        return;
-    }
-
-    // 1. Cole sua string Base64 aqui
-    // Substitua a string de exemplo pela sua string completa.
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    // --- Cabeçalho ---
-    // Centraliza dinamicamente para se adaptar a qualquer tamanho de página
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const centerX = pageWidth / 2;
-
-    doc.addImage(logoBase64, 'PNG', centerX - 20, 10, 40, 20); // Imagem centralizada
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(18);
-    doc.setTextColor(226, 0, 0); // Vermelho ARF
-    doc.text("ARF FUNILARIA E PINTURA", centerX, 35, { align: 'center' });
-
-    doc.setDrawColor(200, 0, 0);
-    doc.setLineWidth(0.6);
-    doc.line(20, 38, pageWidth - 20, 38); // Linha decorativa de margem a margem
-
-    // --- Título da OS ---
-    doc.setFontSize(14);
-    doc.setTextColor(0);
-    doc.text(`Ordem de Serviço #${os.numero}`, 20, 48);
-
-    // --- Dados da OS ---
-    doc.setFontSize(10);
-    const dadosGerais = [
-        ["Cliente:", os.cliente],
-        ["Telefone:", os.telefone || "-"],
-        ["Veículo:", os.veiculo],
-        ["Placa:", os.placa || "-"],
-        ["Problema:", os.problema],
-        ["Status:", formatarStatus(os.status)],
-        ["Prioridade:", formatarPrioridade(os.prioridade)],
-        ["Abertura:", formatarDataHora(os.dataAbertura)],
-        ["Total Geral:", `R$ ${os.totalGeral.toFixed(2)}`],
-    ];
-
-    let y = 56;
-    dadosGerais.forEach(([label, valor]) => {
-        doc.setFont('helvetica', 'bold');
-        doc.text(label, 20, y);
-        doc.setFont('helvetica', 'normal');
-        // O método `splitTextToSize` quebra o texto longo para evitar que ele saia da página
-        const valorFormatado = doc.splitTextToSize(String(valor), pageWidth - 80); // Largura máxima do texto
-        doc.text(valorFormatado, 55, y);
-        // Ajusta a posição Y com base no número de linhas do valor
-        y += (valorFormatado.length * 5) + 2;
-    });
-
-    // --- Tabela de Peças e Serviços ---
-    if (os.pecasServicos && os.pecasServicos.length > 0) {
-        y += 4; // Espaçamento antes da tabela
-        doc.autoTable({
-            head: [["Descrição", "Qtd", "Valor Unit.", "Total"]],
-            body: os.pecasServicos.map(p => [
-                p.descricao,
-                p.quantidade.toString(),
-                `R$ ${p.valorUnitario.toFixed(2)}`,
-                `R$ ${(p.total || (p.quantidade * p.valorUnitario)).toFixed(2)}`
-            ]),
-            startY: y,
-            theme: 'grid', // Um tema visualmente limpo
-            styles: {
-                fontSize: 9,
-                cellPadding: 2
-            },
-            headStyles: {
-                fillColor: [226, 0, 0], // Vermelho ARF para o cabeçalho
-                textColor: 255,
-                fontStyle: 'bold'
-            },
-            alternateRowStyles: {
-                fillColor: [245, 245, 245]
-            },
-            margin: { left: 20, right: 20 }
-        });
-    }
-
-    // --- Rodapé ---
-    const pageHeight = doc.internal.pageSize.height;
-    doc.setFontSize(9);
-    doc.setTextColor(100);
-    doc.text("ARF Funilaria e Pintura - Rua Exemplo, 123 - Tel: (11) 99999-9999", centerX, pageHeight - 10, { align: 'center' });
-
-    // --- Salvar o PDF ---
-    doc.save(`OS_${os.numero}.pdf`);
-}
-
-
-
-
-
 
