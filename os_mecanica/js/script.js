@@ -209,12 +209,6 @@ function carregarOS() {
             <button class="btn btn-sm btn-primary" onclick="editarOS(${os.numero})">
             <i class="bi bi-pencil"></i>
             </button>
-            <button class="btn btn-sm btn-success" onclick="enviarPorWhatsApp(${os.numero})" title="Enviar por WhatsApp">
-            <i class="bi bi-whatsapp"></i>
-            </button>
-            <button class="btn btn-sm btn-warning" onclick="enviarPorEmail(${os.numero})" title="Enviar por Email">
-            <i class="bi bi-envelope"></i>
-            </button>
             <button class="btn btn-sm btn-info" onclick="verHistorico(${os.numero})">
             <i class="bi bi-clock-history"></i>
             </button>
@@ -709,11 +703,11 @@ function selecionarPeca(produto) {
     modal.show();
 
     // Limpar busca
-    document.getElementById("buscaPeca").value = "";
-    document.getElementById("sugestoesPecas").style.display = "none";
-    
-    // Garantir que o modal não está em modo edição ao adicionar nova OS
-    document.getElementById("selecionarPecaModal").removeAttribute("data-modo");
+document.getElementById("buscaPeca").value = "";
+document.getElementById("sugestoesPecas").style.display = "none";
+
+// Garantir que o modal não está em modo edição ao adicionar nova OS
+// document.getElementById("selecionarPecaModal").removeAttribute("data-modo");
 }
 
 // Calcular total da peça no modal
@@ -725,21 +719,22 @@ function calcularTotalPeca() {
 }
 
 // Adicionar peça à OS (funciona para novo cadastro ou edição)
-const modal = bootstrap.Modal.getInstance(document.getElementById('selecionarPecaModal'));
-function adicionarPecaOS() {
-    
-    const descricao = document.getElementById('descricaoSelecionada').value;
-    const quantidade = parseFloat(document.getElementById('quantidadePeca').value);
-    const valorUnitario = parseFloat(document.getElementById('valorUnitarioPeca').value);
-
+//const modal = bootstrap.Modal.getInstance(document.getElementById('selecionarPecaModal'));
 //function adicionarPecaOS() {
-  //const modalEl = document.getElementById('selecionarPecaModal');
-  //const modoEdicao = modalEl.getAttribute('data-modo');
-  //const numero = parseInt(document.getElementById('editarOSId').value);
+    
+    //const descricao = document.getElementById('descricaoSelecionada').value;
+    //const quantidade = parseFloat(document.getElementById('quantidadePeca').value);
+    //const valorUnitario = parseFloat(document.getElementById('valorUnitarioPeca').value);
 
-  //const descricao = document.getElementById('descricaoSelecionada').value;
-  //const quantidade = parseFloat(document.getElementById('quantidadePeca').value);
-  //const valorUnitario = parseFloat(document.getElementById('valorUnitarioPeca').value);
+function adicionarPecaOS() {
+  const modalEl = document.getElementById('selecionarPecaModal');
+  const modoEdicao = modalEl.getAttribute('data-modo');
+  const numero = parseInt(document.getElementById('editarOSId').value);
+
+  const descricao = document.getElementById('descricaoSelecionada').value;
+  const quantidade = parseFloat(document.getElementById('quantidadePeca').value);
+  const valorUnitario = parseFloat(document.getElementById('valorUnitarioPeca').value);
+  
 
   if (!descricao || quantidade <= 0 || valorUnitario < 0) {
     mostrarAlerta('Preencha todos os campos corretamente!', 'warning');
@@ -755,14 +750,16 @@ function adicionarPecaOS() {
   };
 
 
-
-  pecasOSEdicao.push(peca);
+ // pecasOSAtual.push(peca);
+ // pecasOSEdicao.push(peca);
   
 
   if (modoEdicao === 'edicao') {  
+    pecasOSEdicao.push(peca);
     atualizarTabelaPecasOSEdicao();
     calcularTotalGeralEdicao(); // Chamar a função de cálculo para edição
   } else {
+    pecasOSAtual.push(peca);
     atualizarTabelaPecasOS();
     calcularTotalGeral();
   }
@@ -839,23 +836,27 @@ function salvarNovoProduto() {
         usuarioCadastro: usuarioLogado.nome
     };
 
-    produtosServicos.push(produto);
-    salvarDados();
+ produtosServicos.push(produto);
+salvarDados();
 
-    // Fechar modal
-    const modalEl = document.getElementById('novoProdutoModal');
-    const modal = bootstrap.Modal.getInstance(modalEl);
-    
-    // Esperar o modal fechar para remover foco
-    modalEl.addEventListener('hidden.bs.modal', () => {
-        document.activeElement.blur(); // remove foco depois do fechamento
-        // ou: document.getElementById('botaoNovoProduto').focus();
-    }, { once: true });
+// Adicionar o produto recém-criado diretamente à pecasOSAtual
+pecasOSAtual.push(produto);
+atualizarTabelaPecasOS();
+calcularTotalGeral();
 
-    modal.hide();
+// Fechar modal
+const modalEl = document.getElementById('novoProdutoModal');
+const modal = bootstrap.Modal.getInstance(modalEl);
 
-    mostrarAlerta(`${tipo === 'peca' ? 'Peça' : 'Serviço'} cadastrado com sucesso!`, 'success');
-    selecionarPeca(produto);
+// Esperar o modal fechar para remover foco
+modalEl.addEventListener('hidden.bs.modal', () => {
+    document.activeElement.blur(); // remove foco depois do fechamento
+    // ou: document.getElementById('botaoNovoProduto').focus();
+}, { once: true });
+
+modal.hide();
+
+mostrarAlerta(`${tipo === 'peca' ? 'Peça' : 'Serviço'} cadastrado com sucesso!`, 'success');
 }
 
 
@@ -1367,133 +1368,8 @@ function showFinanceiroSection() {
         aplicarFiltroPeriodo();
 }
 }
-// ===== FUNÇÕES PARA ENVIO POR WHATSAPP E EMAIL =====
-
-// Enviar OS por WhatsApp
-function enviarPorWhatsApp(numero) {
-    const os = ordemServicos.find(o => o.numero === numero);
-    if (!os) {
-        mostrarAlerta('OS não encontrada!', 'danger');
-        return;
-    }
-
-    // Verificar se há telefone cadastrado
-    if (!os.telefone) {
-        mostrarAlerta('Cliente não possui telefone cadastrado!', 'warning');
-        return;
-    }
-
-    // Formatar mensagem para WhatsApp
-    const mensagem = formatarMensagemOS(os);
-    
-    // Limpar telefone (remover caracteres especiais)
-    const telefone = os.telefone.replace(/\D/g, '');
-    
-    // Verificar se o telefone tem o formato correto (11 dígitos para celular brasileiro)
-    if (telefone.length < 10 || telefone.length > 11) {
-        mostrarAlerta('Número de telefone inválido!', 'warning');
-        return;
-    }
-
-    // Adicionar código do país se necessário
-    const telefoneCompleto = telefone.startsWith('55') ? telefone : '55' + telefone;
-    
-    // Criar URL do WhatsApp
-    const urlWhatsApp = `https://wa.me/${telefoneCompleto}?text=${encodeURIComponent(mensagem)}`;
-    
-    // Abrir WhatsApp em nova aba
-    window.open(urlWhatsApp, '_blank');
-    
-    // Registrar no histórico
-    if (!os.historico) os.historico = [];
-    os.historico.push({
-        data: new Date().toISOString(),
-        usuario: usuarioLogado.nome,
-        acao: 'Enviado por WhatsApp',
-        detalhes: `Mensagem enviada para ${os.telefone}`
-    });
-    
-    salvarDados();
-    mostrarAlerta(`OS #${numero} enviada por WhatsApp!`, 'success');
-}
-
-// Enviar OS por Email
-function enviarPorEmail(numero) {
-    const os = ordemServicos.find(o => o.numero === numero);
-    if (!os) {
-        mostrarAlerta('OS não encontrada!', 'danger');
-        return;
-    }
-
-    // Formatar mensagem para email
-    const assunto = `Ordem de Serviço #${os.numero} - ${os.cliente}`;
-    const corpo = formatarMensagemOS(os);
-    
-    // Criar URL do email
-    const urlEmail = `mailto:?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
-    
-    // Abrir cliente de email
-    window.location.href = urlEmail;
-    
-    // Registrar no histórico
-    if (!os.historico) os.historico = [];
-    os.historico.push({
-        data: new Date().toISOString(),
-        usuario: usuarioLogado.nome,
-        acao: 'Enviado por Email',
-        detalhes: 'Email preparado para envio'
-    });
-    
-    salvarDados();
-    mostrarAlerta(`OS #${numero} preparada para envio por email!`, 'success');
-}
-
-// Formatar mensagem da OS para envio
-function formatarMensagemOS(os) {
-    const dataFormatada = formatarDataHora(os.dataAbertura);
-    const statusFormatado = formatarStatus(os.status);
-   
-    
-    // Calcular total de peças/serviços
-    const totalPecas = os.pecasServicos ? os.pecasServicos.reduce((total, peca) => total + peca.total, 0) : 0;
-    const custoServico = os.custoServico || 0;
-    const totalGeral = custoServico + totalPecas;
-    
-    // Formatar lista de peças/serviços
-    let listaPecas = '';
-    if (os.pecasServicos && os.pecasServicos.length > 0) {
-        listaPecas = '\n\n *Peças/Serviços:*\n';
-        os.pecasServicos.forEach(peca => {
-            listaPecas += `• ${peca.descricao} - Qtd: ${peca.quantidade} - Valor: R$ ${peca.valorUnitario.toFixed(2)} - Total: R$ ${peca.total.toFixed(2)}\n`;
-        });
-    }
-    
-    const mensagem = ` *ORDEM DE SERVIÇO #${os.numero}*
-
- *Cliente:* ${os.cliente}
-${os.telefone ? ` *Telefone:* ${os.telefone}` : ''}
- *Veículo:* ${os.veiculo}
-${os.placa ? ` *Placa:* ${os.placa}` : ''}
-
- *Problema Relatado:*
-${os.problema}
-
- *Status:* ${statusFormatado}
- *Data de Abertura:* ${dataFormatada}
 
 
- *Valores:*
-• Custo do Serviço: R$ ${custoServico.toFixed(2)}
-• Total em Peças: R$ ${totalPecas.toFixed(2)}
-• *TOTAL GERAL: R$ ${totalGeral.toFixed(2)}*${listaPecas}
-
-${os.observacoes ? `\n *Observações:*\n${os.observacoes}` : ''}
-
----
-ARF Funalizaria e Pintura`;
-
-    return mensagem;
-}
 async function exportarOSParaPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
