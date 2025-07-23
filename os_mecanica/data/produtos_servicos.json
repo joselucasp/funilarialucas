@@ -1,2 +1,141 @@
-[]
-
+[
+  {
+    "id": 1,
+    "descricao": "Produto 01",
+    "tipo": "peca",
+    "valor": 10,
+    "observacoes": ""
+  },
+  {
+    "id": 2,
+    "descricao": "Produto 02",
+    "tipo": "peca",
+    "valor": 10,
+    "observacoes": ""
+  },
+  {
+    "id": 3,
+    "descricao": "Produto 02",
+    "tipo": "peca",
+    "valorUnitario": 10,
+    "observacoes": "",
+    "dataCadastro": "2025-07-23T20:22:48.902Z",
+    "usuarioCadastro": "admin"
+  },
+  {
+    "id": 4,
+    "descricao": "Produto 02",
+    "tipo": "peca",
+    "valorUnitario": 10,
+    "observacoes": "",
+    "dataCadastro": "2025-07-23T20:22:50.934Z",
+    "usuarioCadastro": "admin"
+  },
+  {
+    "id": 5,
+    "descricao": "Produto 02",
+    "tipo": "peca",
+    "valorUnitario": 10,
+    "observacoes": "",
+    "dataCadastro": "2025-07-23T20:22:51.116Z",
+    "usuarioCadastro": "admin"
+  },
+  {
+    "id": 6,
+    "descricao": "Produto 01",
+    "tipo": "peca",
+    "valorUnitario": 100,
+    "observacoes": "",
+    "dataCadastro": "2025-07-23T20:23:09.419Z",
+    "usuarioCadastro": "admin"
+  },
+  {
+    "id": 7,
+    "descricao": "Produto 01",
+    "tipo": "peca",
+    "valorUnitario": 100,
+    "observacoes": "",
+    "dataCadastro": "2025-07-23T20:23:10.212Z",
+    "usuarioCadastro": "admin"
+  },
+  {
+    "id": 8,
+    "descricao": "Produto 01",
+    "tipo": "peca",
+    "valorUnitario": 100,
+    "observacoes": "",
+    "dataCadastro": "2025-07-23T20:23:10.374Z",
+    "usuarioCadastro": "admin"
+  },
+  {
+    "id": 9,
+    "descricao": "Produto 01",
+    "tipo": "peca",
+    "valorUnitario": 100,
+    "observacoes": "",
+    "dataCadastro": "2025-07-23T20:23:10.526Z",
+    "usuarioCadastro": "admin"
+  },
+  {
+    "id": 10,
+    "descricao": "Produto 01",
+    "tipo": "peca",
+    "valorUnitario": 100,
+    "observacoes": "",
+    "dataCadastro": "2025-07-23T20:23:10.688Z",
+    "usuarioCadastro": "admin"
+  },
+  {
+    "id": 11,
+    "descricao": "Produto 01",
+    "tipo": "peca",
+    "valorUnitario": 100,
+    "observacoes": "",
+    "dataCadastro": "2025-07-23T20:23:10.839Z",
+    "usuarioCadastro": "admin"
+  },
+  {
+    "id": 12,
+    "descricao": "Produto 01",
+    "tipo": "peca",
+    "valorUnitario": 100,
+    "observacoes": "",
+    "dataCadastro": "2025-07-23T20:23:10.992Z",
+    "usuarioCadastro": "admin"
+  },
+  {
+    "id": 13,
+    "descricao": "Produto 01",
+    "tipo": "peca",
+    "valor": 100,
+    "observacoes": ""
+  },
+  {
+    "id": 14,
+    "descricao": "Produto 01",
+    "tipo": "peca",
+    "valor": 100,
+    "observacoes": ""
+  },
+  {
+    "id": 15,
+    "descricao": "parachoque",
+    "tipo": "peca",
+    "valor": 100,
+    "observacoes": ""
+  },
+  {
+    "id": 16,
+    "descricao": "parachoque",
+    "tipo": "peca",
+    "valor": 100,
+    "observacoes": ""
+  },
+  {
+    "id": 17,
+    "descricao": "teste1",
+    "tipo": "peca",
+    "valor": 100,
+    "observacoes": ""
+  }
+]

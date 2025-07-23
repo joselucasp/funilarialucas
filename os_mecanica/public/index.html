@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de OS - ARF Funilaria e pintura</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+   <!-- Modal de Login -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="loginUsuario" class="form-label">Usuário</label>
+                            <input type="text" class="form-control" id="loginUsuario" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginSenha" class="form-label">Senha</label>
+                            <input type="password" class="form-control" id="loginSenha" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Entrar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <!-- 👇 Alterado aqui -->
+            <img id="logo-img" alt="Logo" style="height: 40px;">
+            ARF Funilaria e Pintura
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('lancar-os')"><i class="bi bi-plus-circle"></i> Lançar OS</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('consultar-os')"><i class="bi bi-search"></i> Consultar OS</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showSection('usuarios')"><i class="bi bi-people"></i> Usuários</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showFinanceiroSection('financeiro')"><i class="bi bi-cash-coin"></i> Financeiro</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <span class="navbar-text me-3" id="usuarioLogado">Usuário: <span id="nomeUsuario">-</span></span>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-outline-light btn-sm" onclick="logout()">Sair</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Seção Lançar OS -->
+        <div id="lancar-os" class="content-section">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="bi bi-plus-circle"></i> Lançamento de Ordem de Serviço</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="osForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="cliente" class="form-label">Cliente *</label>
+                                            <input type="text" class="form-control" id="cliente" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="telefone" class="form-label">Telefone</label>
+                                            <input type="tel" class="form-control" id="telefone">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="veiculo" class="form-label">Veículo *</label>
+                                            <input type="text" class="form-control" id="veiculo" placeholder="Ex: Honda Civic 2020" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="placa" class="form-label">Placa</label>
+                                            <input type="text" class="form-control" id="placa" placeholder="Ex: ABC-1234">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="problema" class="form-label">Problema Relatado *</label>
+                                    <textarea class="form-control" id="problema" rows="3" required></textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="status" class="form-label">Status</label>
+                                            <select class="form-select" id="status">
+                                                <option value="aberta">Aberta</option>
+                                                <option value="em_andamento">Em Andamento</option>
+                                                <option value="aguardando_pecas">Aguardando Peças</option>
+                                                <option value="concluida">Concluída</option>
+                                                <option value="cancelada">Cancelada</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="prioridade" class="form-label">Prioridade</label>
+                                            <select class="form-select" id="prioridade">
+                                                <option value="baixa">Baixa</option>
+                                                <option value="media" selected>Média</option>
+                                                <option value="alta">Alta</option>
+                                                <option value="urgente">Urgente</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="observacoes" class="form-label">Observações</label>
+                                    <textarea class="form-control" id="observacoes" rows="2"></textarea>
+                                </div>
+                                
+                                <!-- Seção de Custo e Peças/Serviços -->
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h6><i class="bi bi-calculator"></i> Custo e Peças/Serviços</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="custoServico" class="form-label">Custo do Serviço (R$)</label>
+                                                    <input type="number" class="form-control" id="custoServico" step="0.01" min="0" value="0">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Total Geral (R$)</label>
+                                                    <input type="text" class="form-control" id="totalGeral" readonly value="0,00">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Busca e Adição de Peças/Serviços -->
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="mb-3">
+                                                    <label for="buscaPeca" class="form-label">Buscar Peça/Serviço</label>
+                                                    <input type="text" class="form-control" id="buscaPeca" placeholder="Digite para buscar..." autocomplete="off">
+                                                    <div id="sugestoesPecas" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label class="form-label">&nbsp;</label>
+                                                    <button type="button" class="btn btn-success w-100" onclick="abrirModalNovoProduto()">
+                                                        <i class="bi bi-plus-circle"></i> Novo Produto
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Tabela de Peças/Serviços Adicionados -->
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Descrição</th>
+                                                        <th>Qtd</th>
+                                                        <th>Valor Unit.</th>
+                                                        <th>Total</th>
+                                                        <th>Ações</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tabelaPecasOS">
+                                                    <!-- Peças serão adicionadas aqui -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Lançar OS</button>
+                                    <button type="button" class="btn btn-secondary ms-2" onclick="limparFormulario()"><i class="bi bi-arrow-clockwise"></i> Limpar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-info-circle"></i> Informações</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Total de OS:</strong> <span id="totalOS">0</span></p>
+                            <p><strong>OS Abertas:</strong> <span id="osAbertas">0</span></p>
+                            <p><strong>OS em Andamento:</strong> <span id="osAndamento">0</span></p>
+                            <p><strong>OS Concluídas:</strong> <span id="osConcluidas">0</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção Consultar OS -->
+        <div id="consultar-os" class="content-section" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="bi bi-search"></i> Consultar Ordens de Serviço</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <label for="filtroStatus" class="form-label">Filtrar por Status</label>
+                            <select class="form-select" id="filtroStatus" onchange="filtrarOS()">
+                                <option value="">Todos</option>
+                                <option value="aberta">Aberta</option>
+                                <option value="em_andamento">Em Andamento</option>
+                                <option value="aguardando_pecas">Aguardando Peças</option>
+                                <option value="concluida">Concluída</option>
+                                <option value="cancelada">Cancelada</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filtroCliente" class="form-label">Filtrar por Cliente</label>
+                            <input type="text" class="form-control" id="filtroCliente" placeholder="Nome do cliente" onkeyup="filtrarOS()">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filtroVeiculo" class="form-label">Filtrar por Veículo</label>
+                            <input type="text" class="form-control" id="filtroVeiculo" placeholder="Modelo do veículo" onkeyup="filtrarOS()">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filtroData" class="form-label">Data</label>
+                            <input type="date" class="form-control" id="filtroData" onchange="filtrarOS()">
+                        </div>
+                        </div>
+                        <div class="mb-3 text-end">
+                    <button class="btn btn-danger btn-sm" onclick="exportarOSParaPDF()">
+                        <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+                    </button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>OS #</th>
+                                    <th>Data</th>
+                                    <th>Cliente</th>
+                                    <th>Veículo</th>
+                                    <th>Status</th>
+                                    <th>Prioridade</th>
+                                    <th>Total</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaOS">
+                                <!-- OS serão carregadas aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção Usuários -->
+        <div id="usuarios" class="content-section" style="display: none;">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="bi bi-person-plus"></i> Cadastrar Usuário</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="usuarioForm">
+                                <div class="mb-3">
+                                    <label for="nomeUsuarioNovo" class="form-label">Nome do Usuário *</label>
+                                    <input type="text" class="form-control" id="nomeUsuarioNovo" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="senhaUsuarioNovo" class="form-label">Senha *</label>
+                                    <input type="password" class="form-control" id="senhaUsuarioNovo" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="perfilUsuario" class="form-label">Perfil</label>
+                                    <select class="form-select" id="perfilUsuario">
+                                        <option value="operador">Operador</option>
+                                        <option value="supervisor">Supervisor</option>
+                                        <option value="admin">Administrador</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Cadastrar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="bi bi-people"></i> Usuários Cadastrados</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Usuário</th>
+                                            <th>Perfil</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabelaUsuarios">
+                                        <!-- Usuários serão carregados aqui -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Seção Financeiro -->
+        <div id="financeiro" class="content-section" style="display: none;">
+            <div class="row">
+                <!-- Cards de Resumo -->
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-header">
+                            <h6><i class="bi bi-check-circle"></i> OS Concluídas</h6>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="totalOSConcluidas">0</h4>
+                            <small>Total de OS finalizadas</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-header">
+                            <h6><i class="bi bi-currency-dollar"></i> Receita Total</h6>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="receitaTotal">R$ 0,00</h4>
+                            <small>Valor total arrecadado</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-info">
+                        <div class="card-header">
+                            <h6><i class="bi bi-tools"></i> Receita Serviços</h6>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="receitaServicos">R$ 0,00</h4>
+                            <small>Valor em serviços</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-header">
+                            <h6><i class="bi bi-gear"></i> Receita Peças</h6>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="receitaPecas">R$ 0,00</h4>
+                            <small>Valor em peças</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <!-- Filtros -->
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-funnel"></i> Filtros de Período</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="filtroDataInicio" class="form-label">Data Início</label>
+                                    <input type="date" class="form-control" id="filtroDataInicio" onchange="atualizarRelatorioFinanceiro()">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="filtroDataFim" class="form-label">Data Fim</label>
+                                    <input type="date" class="form-control" id="filtroDataFim" onchange="atualizarRelatorioFinanceiro()">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="filtroPeriodo" class="form-label">Período Rápido</label>
+                                    <select class="form-select" id="filtroPeriodo" onchange="aplicarFiltroPeriodo()">
+                                        <option value="">Personalizado</option>
+                                        <option value="hoje">Hoje</option>
+                                        <option value="semana">Esta Semana</option>
+                                        <option value="mes">Este Mês</option>
+                                        <option value="trimestre">Este Trimestre</option>
+                                        <option value="ano">Este Ano</option>
+                                        <option value="todos">Todos os Períodos</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="button" class="btn btn-primary w-100" onclick="atualizarRelatorioFinanceiro()">
+                                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <!-- Gráfico de Receita por Mês -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-bar-chart"></i> Receita por Mês</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="graficoReceitaMensal" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gráfico de Distribuição Serviços vs Peças -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-pie-chart"></i> Distribuição de Receita</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="graficoDistribuicao" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <!-- Tabela de OS Concluídas -->
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="bi bi-table"></i> OS Concluídas - Detalhamento Financeiro</h5>
+                            <button type="button" class="btn btn-success btn-sm" onclick="exportarRelatorioFinanceiro()">
+                                <i class="bi bi-download"></i> Exportar
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>OS #</th>
+                                            <th>Data Conclusão</th>
+                                            <th>Cliente</th>
+                                            <th>Veículo</th>
+                                            <th>Custo Serviço</th>
+                                            <th>Valor Peças</th>
+                                            <th>Total</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tabelaFinanceiro">
+                                        <!-- OS concluídas serão carregadas aqui -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumo Estatístico -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-calculator"></i> Estatísticas do Período</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Ticket Médio:</strong></td>
+                                    <td id="ticketMedio">R$ 0,00</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Maior OS:</strong></td>
+                                    <td id="maiorOS">R$ 0,00</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Menor OS:</strong></td>
+                                    <td id="menorOS">R$ 0,00</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>OS por Dia (média):</strong></td>
+                                    <td id="osPorDia">0</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Receita por Dia (média):</strong></td>
+                                    <td id="receitaPorDia">R$ 0,00</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="bi bi-trophy"></i> Top Clientes</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="topClientes">
+                                <!-- Top clientes serão carregados aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Modal para Editar OS -->
+    <div class="modal fade" id="editarOSModal" tabindex="-1" aria-labelledby="editarOSModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editarOSModalLabel">Editar Ordem de Serviço</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editarOSForm">
+                        <input type="hidden" id="editarOSId">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editarCliente" class="form-label">Cliente</label>
+                                    <input type="text" class="form-control" id="editarCliente" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editarTelefone" class="form-label">Telefone</label>
+                                    <input type="tel" class="form-control" id="editarTelefone">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editarVeiculo" class="form-label">Veículo</label>
+                                    <input type="text" class="form-control" id="editarVeiculo" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editarPlaca" class="form-label">Placa</label>
+                                    <input type="text" class="form-control" id="editarPlaca">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editarProblema" class="form-label">Problema Relatado</label>
+                            <textarea class="form-control" id="editarProblema" rows="3" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editarStatus" class="form-label">Status</label>
+                                    <select class="form-select" id="editarStatus">
+                                        <option value="aberta">Aberta</option>
+                                        <option value="em_andamento">Em Andamento</option>
+                                        <option value="aguardando_pecas">Aguardando Peças</option>
+                                        <option value="concluida">Concluída</option>
+                                        <option value="cancelada">Cancelada</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="editarPrioridade" class="form-label">Prioridade</label>
+                                    <select class="form-select" id="editarPrioridade">
+                                        <option value="baixa">Baixa</option>
+                                        <option value="media">Média</option>
+                                        <option value="alta">Alta</option>
+                                        <option value="urgente">Urgente</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editarObservacoes" class="form-label">Observações</label>
+                            <textarea class="form-control" id="editarObservacoes" rows="2"></textarea>
+                        </div>
+                        
+                        <!-- Seção de Custo e Peças/Serviços na Edição -->
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h6><i class="bi bi-calculator"></i> Custo e Peças/Serviços</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="editarCustoServico" class="form-label">Custo do Serviço (R$)</label>
+                                            <input type="number" class="form-control" id="editarCustoServico" step="0.01" min="0" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Total Geral (R$)</label>
+                                            <input type="text" class="form-control" id="editarTotalGeral" readonly value="0,00">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Busca e Adição de Peças/Serviços na Edição -->
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="mb-3">
+                                            <label for="editarBuscaPeca" class="form-label">Buscar Peça/Serviço</label>
+                                            <input type="text" class="form-control" id="editarBuscaPeca" placeholder="Digite para buscar..." autocomplete="off">
+                                            <div id="editarSugestoesPecas" class="list-group position-absolute w-100" style="z-index: 1000; display: none;"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">&nbsp;</label>
+                                            <button type="button" class="btn btn-success w-100" onclick="abrirModalNovoProduto()">
+                                                <i class="bi bi-plus-circle"></i> Novo Produto
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tabela de Peças/Serviços na Edição -->
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Descrição</th>
+                                                <th>Qtd</th>
+                                                <th>Valor Unit.</th>
+                                                <th>Total</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="editarTabelaPecasOS">
+                                            <!-- Peças serão adicionadas aqui -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 mt-3">
+                            <label for="novaObservacao" class="form-label">Nova Observação</label>
+                            <textarea class="form-control" id="novaObservacao" rows="2" placeholder="Adicione uma nova observação sobre a OS..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="salvarEdicaoOS()">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Ver Histórico -->
+    <div class="modal fade" id="historicoModal" tabindex="-1" aria-labelledby="historicoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="historicoModalLabel">Histórico da OS</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="historicoContent">
+                        <!-- Histórico será carregado aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Novo Produto/Serviço -->
+    <div class="modal fade" id="novoProdutoModal" tabindex="-1" aria-labelledby="novoProdutoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="novoProdutoModalLabel">Cadastrar Novo Produto/Serviço</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="novoProdutoForm">
+                        <div class="mb-3">
+                            <label for="descricaoProduto" class="form-label">Descrição *</label>
+                            <input type="text" class="form-control" id="descricaoProduto" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tipoProduto" class="form-label">Tipo</label>
+                            <select class="form-select" id="tipoProduto">
+                                <option value="peca">Peça</option>
+                                <option value="servico">Serviço</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="valorProduto" class="form-label">Valor Unitário (R$) *</label>
+                            <input type="number" class="form-control" id="valorProduto" step="0.01" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="observacoesProduto" class="form-label">Observações</label>
+                            <textarea class="form-control" id="observacoesProduto" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="salvarNovoProduto()">Cadastrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Selecionar Peça/Serviço -->
+    <div class="modal fade" id="selecionarPecaModal" tabindex="-1" aria-labelledby="selecionarPecaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="selecionarPecaModalLabel">Adicionar Peça/Serviço</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="selecionarPecaForm">
+                        <input type="hidden" id="idProdutoSelecionado">
+                        <div class="mb-3">
+                            <label for="descricaoSelecionada" class="form-label">Descrição</label>
+                            <input type="text" class="form-control" id="descricaoSelecionada" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quantidadePeca" class="form-label">Quantidade *</label>
+                            <input type="number" class="form-control" id="quantidadePeca" min="1" value="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="valorUnitarioPeca" class="form-label">Valor Unitário (R$) *</label>
+                            <input type="number" class="form-control" id="valorUnitarioPeca" step="0.01" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="totalPeca" class="form-label">Total (R$)</label>
+                            <input type="text" class="form-control" id="totalPeca" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="adicionarPecaOS()">Adicionar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="js/logo-base64.js"></script>
+    <script src="js/logosite.js"></script>
+ <script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('logo-img').src = logosite;
+});
+</script>
+
+</body>
+</html>
+

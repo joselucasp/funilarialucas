@@ -1,26 +1,76 @@
 [
   {
     "numero": 1,
-    "cliente": "João Silva",
-    "telefone": "(11) 99999-9999",
-    "veiculo": "Honda Civic 2018",
-    "placa": "ABC-1234",
-    "problema": "Barulho estranho no motor ao acelerar. Cliente relata que o problema começou há 3 dias.",
-    "status": "aberta",
+    "cliente": "LUCAS",
+    "telefone": "(41) 99804-1561",
+    "veiculo": "honda",
+    "placa": "NOS-0I32",
+    "problema": "TESTE",
+    "status": "concluida",
     "prioridade": "media",
-    "observacoes": "",
-    "dataAbertura": "2025-07-01T12:01:00.000Z",
+    "observacoes": "TESTE",
+    "custoServico": 300,
+    "pecasServicos": [
+      {
+        "idProduto": "1",
+        "descricao": "Produto 01",
+        "quantidade": 10,
+        "valorUnitario": 10
+      }
+    ],
+    "totalGeral": 400,
+    "dataAbertura": "2025-07-23T16:53:51.610Z",
     "usuarioAbertura": "admin",
     "historico": [
       {
-        "data": "2025-07-01T12:01:00.000Z",
+        "data": "2025-07-23T16:53:51.611Z",
         "usuario": "admin",
         "acao": "Abertura da OS",
-        "detalhes": "Status: Aberta, Prioridade: Média"
+        "detalhes": "Status: aberta, Prioridade: media, Total: R$ 400.00"
+      },
+      {
+        "data": "2025-07-23T16:54:15.174Z",
+        "usuario": "admin",
+        "acao": "Edição da OS",
+        "detalhes": "Dados atualizados. Total: R$ 400.00"
+      },
+      {
+        "data": "2025-07-23T20:54:11.237Z",
+        "usuario": "admin",
+        "acao": "Edição da OS",
+        "detalhes": "Dados atualizados. Total: R$ 400.00 | Status alterado de \"Aberta\" para \"Concluída\""
+      }
+    ]
+  },
+  {
+    "numero": 2,
+    "cliente": "jose",
+    "telefone": "(41) 99804-1561",
+    "veiculo": "honda",
+    "placa": "NOS-0I32",
+    "problema": "parachoque",
+    "status": "aberta",
+    "prioridade": "media",
+    "observacoes": "",
+    "custoServico": 1000,
+    "pecasServicos": [
+      {
+        "idProduto": "15",
+        "descricao": "parachoque",
+        "quantidade": 1,
+        "valorUnitario": 100
       }
     ],
-    "custoServico": 0,
-    "pecasServicos": []
+    "totalGeral": 1100,
+    "dataAbertura": "2025-07-23T20:35:03.113Z",
+    "usuarioAbertura": "admin",
+    "historico": [
+      {
+        "data": "2025-07-23T20:35:03.113Z",
+        "usuario": "admin",
+        "acao": "Abertura da OS",
+        "detalhes": "Status: aberta, Prioridade: media, Total: R$ 1100.00"
+      }
+    ]
   }
 ]
-

@@ -1,0 +1,5 @@
+# Arquivo de Movimentações - Sistema de OS
+# Formato: Data/Hora | OS # | Cliente | Ação | Usuário | Detalhes
+# Este arquivo é atualizado automaticamente pelo sistema
+
+

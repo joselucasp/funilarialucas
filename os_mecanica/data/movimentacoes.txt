@@ -2,4 +2,7 @@
 # Formato: Data/Hora | OS # | Cliente | Ação | Usuário | Detalhes
 # Este arquivo é atualizado automaticamente pelo sistema
 
-
+23/07/2025, 13:53:51 | OS #1 | LUCAS | Abertura da OS | Usuário: admin | 
+23/07/2025, 13:54:15 | OS #1 | LUCAS | Edição da OS | Usuário: admin | Dados atualizados. Total: R$ 400.00
+23/07/2025, 17:35:03 | OS #2 | jose | Abertura da OS | Usuário: admin | 
+23/07/2025, 17:54:11 | OS #1 | LUCAS | Edição da OS | Usuário: admin | Dados atualizados. Total: R$ 400.00 | Status alterado de "Aberta" para "Concluída"
